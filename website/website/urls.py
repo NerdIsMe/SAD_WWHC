@@ -20,5 +20,7 @@ from machine_scheduling.views import *
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', home),
+    path('error/<str:error_message>/', error_page),
     path('new_schedule/upload/', new_schedule_upload), 
+    path('new_schedule/view&check/<str:document_date>/', new_schedule_viewcheck), 
 ]

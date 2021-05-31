@@ -1,6 +1,22 @@
 from django.shortcuts import render
 from django.http import HttpResponseRedirect, HttpResponse
 from .models import Document, StrongMachineInfo, WeakMachineInfo
+
+from .functions.setting_info import *
+
+import pandas as pd
+import numpy as np
+# Create your views here.
+
+def delete_file(document_date):
+    import os
+    data = Document.objects.get(date = document_date)
+    data.file.delete()
+    if data.schedule_is_done:
+        os.remove(str(Path(server_settings.MEDIA_ROOT)) + data.date.strftime('\\documents\\results\\%Y-%m-%d_圖示化結果.html'))
+        os.remove(str(Path(server_settings.MEDIA_ROOT)) + data.date.strftime('\\documents\\results\\%Y-%m-%d_產品排程資訊.xlsx'))
+        os.remove(str(Path(server_settings.MEDIA_ROOT)) + data.date.strftime('\\documents\\results\\%Y-%m-%d_機台排程資訊.xlsx'))
+    data.delete()
 # Create your views here.
 
 def home(request):
@@ -26,3 +42,54 @@ def new_schedule_upload(request):
         return HttpResponseRedirect('../view&check/%s/' %raw_data.date)
 
     return render(request, 'machine_scheduling/new_schedule/upload.html', locals())
+
+def error_page(request, error_message):
+    return render(request, 'website_error.html', locals())
+
+def new_schedule_viewcheck(request, document_date):
+    data = Document.objects.get(date = document_date)
+
+    #try:
+    xls = pd.ExcelFile(data.file)
+    products_dict = pd.read_excel(xls, sheet_name=None, header=None)
+    order_names = []; numbers_of_cars = []; product_tables = []
+    car_processing_times = []
+    for i in products_dict:
+        tempt = products_dict[i]
+        order_name = tempt.iloc[0, 0]; number_of_cars = tempt.iloc[0, 2] 
+        tempt.columns = tempt.iloc[1, :]
+        tempt.drop([0,1], inplace = True)
+        tempt = tempt.fillna('-')
+
+        order_names.append(order_name)
+        numbers_of_cars.append(number_of_cars)
+        product_tables.append(tempt)
+        car_processing_time = tempt.iloc[:, 2].sum()/60; car_processing_times.append(car_processing_time)
+
+    number_of_orders = len(products_dict)
+    total_number_or_cars = sum(numbers_of_cars)
+    order_processing_times = (list(map(lambda x, y: x*y, numbers_of_cars, car_processing_times)))
+
+    product_info = zip(order_names, numbers_of_cars, product_tables)
+    product_simple_info = zip(order_names, numbers_of_cars, car_processing_times, order_processing_times)
+    
+    total_processing_time = sum(order_processing_times)
+    machine_startTimes = getStartTime()
+    machine_names = ['機台' + str(i+1) for i in range(getNormalMachineNum()+1)]
+    machine_names[0] += '(弱機台)'
+    machine_info = zip(machine_names, machine_startTimes)
+    if request.method == 'POST':
+        print('receive request')
+        if 'cancel_schedule' in request.POST:
+            data.delete()
+            return HttpResponseRedirect('/new_schedule/upload/')
+        elif 'do_schedule' in request.POST:
+            return HttpResponseRedirect('/new_schedule/schedule/%s/' %document_date)
+
+    data.file.close()
+    return render(request, 'machine_scheduling/new_schedule/viewcheck.html', locals())
+
+    # except:
+    #     data.file.close()
+    #     delete_file(document_date)
+    #     return HttpResponseRedirect('/error/檔案格式不正確，請檢查/')

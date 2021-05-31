@@ -1,0 +1,78 @@
+{% extends '../../base.html' %}
+{% block content %}
+
+    <section id="main">
+        <div  class="inner">
+            <header class="major special">
+                <h1>檢查上傳資料：</h1>
+            </header>
+        <br>
+        <h3>系統設定和商品簡表：</h3>
+        <table style = "width: 18cm; margin-left: auto; margin-right: auto;">
+            <tr>
+                <td>
+                    <ul>
+                        <li>排程日期：{{data.date}}</li>
+                        <li>共有 {{number_of_orders}} 種商品</li>
+                        <li>共有 {{total_number_or_cars}} 車</li>
+                        <li>共需約 {{total_processing_time|floatformat:1}} 小時的機台運作時間</li>
+                    </ul>
+                </td>
+                <td>
+                    <p id = 'zeroMargin'>各機台開始時間：</p>
+                    <ul id = 'zeroMargin'>
+                        {%for name, startTime in machine_info%}
+                            <li>{{name}}：{{startTime}}</li>
+                        {%endfor%}
+                    </ul>
+                </td>
+            </tr>
+        </table>
+
+        <table style = "width: 18cm; margin-left: auto; margin-right: auto;">
+            <tr>
+                <th>商品名稱</th>
+                <th>生產車數</th>
+                <th>每車所需時間（小時）</th>
+                <th>商品總生產時間（小時）</th>
+            </tr>
+        {% for order_name, number_of_cars, car_processing_time, total_processing_time in product_simple_info %}
+            <tr>
+                <td>{{order_name}}</td>
+                <td>{{number_of_cars}}</td>
+                <td>{{car_processing_time|floatformat:1}}</td>
+                <td>{{total_processing_time|floatformat:1}}</td>
+            </tr>
+        {%endfor%}
+        </table>
+
+        <h3>各商品製程：</h3>
+        <div  class="inner">
+            {% load table_view_tag %}
+            {% for order_name, number_of_cars, table in product_info %}
+                <h4>{{order_name}}：{{number_of_cars}} 車</h4>
+                <table style = "width: 18cm; margin-left: auto; margin-right: auto;">
+                    <tr>
+                    {%for column in table.columns %}
+                        <th>{{column}}</th>
+                    {% endfor %}
+                    </tr>
+                    {% for index, row in table.iterrows %}
+                        <tr>
+                            {% for column in table.columns %}
+                                <td>{{row|get_obj_attr:column}}</td>
+                            {%endfor %}
+                        </tr>
+                    {% endfor %}
+                </table>
+            {% endfor %}
+        </div>
+        <div style ="text-align:right">
+            <form method = 'POST'>{%csrf_token%}
+                <input type="submit" value="取消/重新上傳" class = "button" name="cancel_schedule">
+                <input type="submit" value="開始排程" class = "button" name="do_schedule">
+            </form>
+        </div>
+    </section>
+
+{% endblock %}
