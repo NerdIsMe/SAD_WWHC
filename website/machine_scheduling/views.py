@@ -1,11 +1,14 @@
 from django.shortcuts import render
 from django.http import HttpResponseRedirect, HttpResponse
+from django.conf import settings as server_settings
+
 from .models import Document, StrongMachineInfo, WeakMachineInfo
 
 from .functions.setting_info import *
-
+from .functions.merge_alg import *
 import pandas as pd
 import numpy as np
+from pathlib import Path
 # Create your views here.
 
 def delete_file(document_date):
@@ -93,3 +96,36 @@ def new_schedule_viewcheck(request, document_date):
     #     data.file.close()
     #     delete_file(document_date)
     #     return HttpResponseRedirect('/error/檔案格式不正確，請檢查/')
+
+
+def new_schedule_doschedule(request, document_date):
+
+    from .functions.plot_schedule import PlotSchedule
+    data = Document.objects.get(date = document_date)
+    results = Apply(data.file, num_of_machineNormal = getNormalMachineNum(), start_time_list= getRelativeStartTime())
+    data.file.close()
+    figs = []; figs_html = []
+    s = 0
+    for i in results:
+        s+=1
+        figure = PlotSchedule(i, data.date, datumTime(), getNormalMachineNum())
+        figs.append(figure)
+        figs_html.append(figure.to_html(full_html=False, default_height=500, default_width=900))
+
+    date = data.date
+    #dir_path = str(Path(server_settings.MEDIA_ROOT)) + date.strftime('\\documents\\%Y\\%m\\%d\\')
+    dir_path = str(Path(server_settings.MEDIA_ROOT)) + date.strftime('\\documents\\results\\%Y-%m-%d_')
+    if request.method == 'POST':
+        for i in range(len(results)):
+            if str(i+1) in request.POST:
+                Save(results[i], dir_path, powerTime = datumTime())
+                figs[i].write_html(dir_path+'圖示化結果.html')
+                break
+        data.schedule_is_done = True
+        data.save()
+        return HttpResponseRedirect('/history_schedule/%s/' %(document_date))
+
+    fig_info = zip(range(1, len(results)+1), figs_html)
+    return render(request, 'machine_scheduling/new_schedule/doschedule.html', locals())
+
+
