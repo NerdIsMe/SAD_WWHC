@@ -1,0 +1,41 @@
+{% extends '../../base.html' %}
+{% block content %}
+
+    <section id="main">
+        <div  class="inner">
+            <header class="major special">
+                <h1>歷史排程</h1>
+            </header>
+            
+            <form method="GET">
+              <select style="width:250px;display:inline" name = 'select_month'>
+                {%for one_option in select_options %}
+                  <option value = '{{one_option}}' {%if one_option == the_selected_option %} selected {%endif%}>{{one_option}}</option>
+                {%endfor%}
+              </select>
+              &nbsp;
+              <input type="submit" value="查詢" class = "button" name="submit">
+            </form>
+
+            <form action="" method="POST"> {% csrf_token %}
+              <table><tr>
+                {% for document in latest_month_data %}
+                  <td> 
+                    <a href = './{{document.date|date:"Y-m-d"}}/'>{{ document.date }}</a>
+                  </td>
+                   {% if forloop.last %}
+                     </tr>
+                   {% else %}
+                     {% if forloop.counter|divisibleby:"3" %}
+                       </tr><tr>
+                     {% endif %}
+                   {% endif %}
+                {% endfor %}
+              </table>
+                <td><input type="submit" value="勾選刪除" class = "button special" name="submit"></td>
+                <a class="button alt" href='./select_range_delete/'>時間區段刪除</a>
+            </form>
+        </div>
+    </section>
+
+{% endblock %}

@@ -24,4 +24,10 @@ urlpatterns = [
     path('new_schedule/upload/', new_schedule_upload), 
     path('new_schedule/view&check/<str:document_date>/', new_schedule_viewcheck),
     path('new_schedule/schedule/<str:document_date>/', new_schedule_doschedule),
+    path('history_schedule/', history_schedule_menu),
+    path('history_schedule/delete/<int:year>/<int:month>/origin_num=<int:origin_num>/', history_schedule_menu_delete),
+    path('history_schedule/select_range_delete/', history_schedule_select_range_delete),
+    path('history_schedule/select_range_delete/<str:start_date>/<str:end_date>/', history_schedule_select_range_delete_check),
+    path('history_schedule/<str:document_date>/', history_schedule_one),
+    path('history_schedule/<str:document_date>/product_info_view/', history_schedule_one_view),
 ]

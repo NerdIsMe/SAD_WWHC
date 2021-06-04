@@ -1,0 +1,62 @@
+{% extends '../../base.html' %}
+{% block content %}
+
+    <section id="main">
+        <div  class="inner">
+            <header class="major special">
+                <table style="border:5px #ffffff solid; margin: 0 0 0 0;">
+                    <col style="width: 80%;">
+                    <col style="width: 20%;">
+                    <tr>
+                        <td><h1>{{data.date}}-商品資訊</h1></td>
+                        <td><input type ="button" onclick="history.back()" value="返回結果"></input></td>
+                    </tr>
+                </table>
+            </header>
+            
+            <h3>當日商品簡表：</h3>
+            <table style = "width: 18cm; margin-left: auto; margin-right: auto;">
+                <tr>
+                    <th>商品名稱</th>
+                    <th>生產車數</th>
+                    <th>每車所需時間（小時）</th>
+                    <th>商品總生產時間（小時）</th>
+                </tr>
+            {% for order_name, number_of_cars, car_processing_time, total_processing_time in product_simple_info %}
+                <tr>
+                    <td>{{order_name}}</td>
+                    <td>{{number_of_cars}}</td>
+                    <td>{{car_processing_time|floatformat:1}}</td>
+                    <td>{{total_processing_time|floatformat:1}}</td>
+                </tr>
+            {%endfor%}
+            </table>
+    
+            <h3>各商品製程：</h3>
+            <div  class="inner">
+                {% load table_view_tag %}
+                {% for order_name, number_of_cars, table in product_info %}
+                    <h4>{{order_name}}：{{number_of_cars}} 車</h4>
+                    <table style = "width: 18cm; margin-left: auto; margin-right: auto;">
+                        <tr>
+                        {%for column in table.columns %}
+                            <th>{{column}}</th>
+                        {% endfor %}
+                        </tr>
+                        {% for index, row in table.iterrows %}
+                            <tr>
+                                {% for column in table.columns %}
+                                    <td>{{row|get_obj_attr:column}}</td>
+                                {%endfor %}
+                            </tr>
+                        {% endfor %}
+                    </table>
+                {% endfor %}
+            </div>
+
+            <form method = "POST">{%csrf_token%}
+            </form>
+        </div>
+    </section>
+
+{% endblock %}
