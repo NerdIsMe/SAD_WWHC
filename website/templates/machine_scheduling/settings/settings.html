@@ -1,0 +1,62 @@
+{% extends '../../base.html' %}
+{% block content %}
+
+    <section id="main">
+        <div  class="inner">
+            <header class="major special">
+                <h1>系統設定</h1>
+                
+            </header>
+            <table>
+                <tr>
+                <td>
+                <table style = "width: 12cm; margin-left: auto; margin-right: auto;">
+                    <col style="width: 50%;">
+                    <col style="width: 30%;">
+                    <col style="width: 20%;">
+                    <tr>
+                        <th>機台種類</th>
+                        <th>機台數</th>
+                        <th></th>
+                    </tr>
+                    <tr>
+                        <td>弱機台個數（只能<strong>煮</strong>）</td>
+                        <td>{{num_weak_machine}}</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>強機台個數</td>
+                        <td>{{num_strong_machine}}</td>
+                        <td><a href="./strongMachineNum" class="button">調整</a></td>
+                    </tr>
+                </table>
+                </td>
+                <td>
+                <table style = "width: 12cm; margin-left: auto; margin-right: auto;">
+                    <col style="width: 40%;">
+                    <col style="width: 40%;">
+                    <col style="width: 20%;">
+                    <tr>
+                        <th>機台編號</th>
+                        <th>開始時間</th>
+                        <th></th>
+                    </tr>
+                    <tr>
+                        <td>機台 1（弱機台）</td>
+                        <td>{{weakMachine.startTime}}</td>
+                        <td><a href="./startTime/weakMachine/{{weakMachine.index}}" class="button">調整</a></td>
+                    </tr>
+                    {%for machine in strongMachines %}
+                        <tr>
+                            <td>機台 {{machine.index}}</td>
+                            <td>{{machine.startTime}}</td>
+                            <td><a href="./startTime/strongMachine/{{machine.index}}" class="button">調整</a></td>
+                        </tr>
+                    {%endfor%}
+                </table>
+                </td>
+                </tr>
+        </table>
+    </section>
+
+{% endblock %}

@@ -30,4 +30,7 @@ urlpatterns = [
     path('history_schedule/select_range_delete/<str:start_date>/<str:end_date>/', history_schedule_select_range_delete_check),
     path('history_schedule/<str:document_date>/', history_schedule_one),
     path('history_schedule/<str:document_date>/product_info_view/', history_schedule_one_view),
+    path('settings/', settings),
+    path('settings/strongMachineNum/', modify_strongMachineNum),
+    path('settings/startTime/<str:machine_type>/<int:machine_index>', modify_startTime),
 ]

@@ -277,3 +277,44 @@ def history_schedule_select_range_delete_check(request, start_date, end_date):
             return HttpResponseRedirect('/error/輸入錯誤，刪除資料失敗，請重新嘗試')
 
     return render(request, 'machine_scheduling/history_schedule/select_range_delete_check.html', locals())
+
+def settings(request):
+    num_weak_machine = WeakMachineInfo.objects.count()
+    num_strong_machine = StrongMachineInfo.objects.count()
+    weakMachine = WeakMachineInfo.objects.get(index = 1)
+    strongMachines = StrongMachineInfo.objects.all()
+    return render(request, 'machine_scheduling/settings/settings.html', locals())
+
+def modify_strongMachineNum(request):
+    num_weak_machine = WeakMachineInfo.objects.count()
+    num_strong_machine = StrongMachineInfo.objects.count()
+    if request.method == 'POST':
+        modifyStrongMachineNum(int(request.POST['strongMachineNum']))
+        return HttpResponseRedirect('/settings/')
+
+    return render(request, 'machine_scheduling/settings/strongMachineNum.html', locals())
+
+def modify_startTime(request, machine_type, machine_index):
+    num_weak_machine = WeakMachineInfo.objects.count()
+    num_strong_machine = StrongMachineInfo.objects.count()
+    weakMachine = WeakMachineInfo.objects.get(index = 1)
+    strongMachines = StrongMachineInfo.objects.all()
+    if machine_type == 'weakMachine':
+        if request.method == 'POST':
+            newStartTime = request.POST['startTime']
+            the_machine = WeakMachineInfo.objects.get(index = machine_index)
+            the_machine.startTime = newStartTime
+            the_machine.save()
+            return HttpResponseRedirect('/settings/')
+        return render(request, 'machine_scheduling/settings/weak_machine_startTime.html', locals())
+
+    elif machine_type == 'strongMachine':
+        if request.method == 'POST':
+            newStartTime = request.POST['startTime']
+            the_machine = StrongMachineInfo.objects.get(index = machine_index)
+            the_machine.startTime = newStartTime
+            the_machine.save()
+            return HttpResponseRedirect('/settings/')
+            
+        return render(request, 'machine_scheduling/settings/strong_machine_startTime.html', locals())
+
